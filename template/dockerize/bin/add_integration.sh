@@ -1,0 +1,1 @@
+docker-compose exec --user=root sentry pip install sentry-redmine

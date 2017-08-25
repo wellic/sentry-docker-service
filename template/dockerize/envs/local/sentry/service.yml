@@ -1,0 +1,73 @@
+sentry:
+    restart: ${SENTRY_DOCKER_RESTART}
+    env_file:
+        - .env
+        - container.env
+        - sentry.env
+    build:
+        context: ./services/sentry
+        args:
+            - SENTRY_VERSION
+    image:          "${PROJECT_NAME}-sentry:${SENTRY_VERSION}"
+    container_name: "${PROJECT_NAME}-sentry"
+    hostname:       "${SENTRY_HOSTNAME:-sentry}"
+    depends_on:
+        - redis
+        - postgres
+    links:
+        - redis
+        - postgres
+    ports:
+        - "${SENTRY_HOST_PORT}:9000"
+#    volumes:
+#        - ${DATA_SAVE_PATH}/sentry/root:/data
+#    networks:
+#        - backend
+
+sentry_cron:
+    restart: ${SENTRY_DOCKER_RESTART}
+    env_file:
+        - .env
+        - container.env
+        - sentry.env
+    build:
+        context: ./services/sentry
+        args:
+            - SENTRY_VERSION
+    image:          "${PROJECT_NAME}-sentry:${SENTRY_VERSION}"
+    container_name: "${PROJECT_NAME}-sentry-beat"
+    hostname:       "${SENTRY_BEAT_HOSTNAME:-sentry-beat}"
+    depends_on:
+        - redis
+        - postgres
+    links:
+        - redis
+        - postgres
+    command: "run cron"
+#    volumes:
+#        - ${DATA_SAVE_PATH}/sentry/beat:/data
+
+sentry_worker:
+    restart: ${SENTRY_DOCKER_RESTART}
+    env_file:
+        - .env
+        - container.env
+        - sentry.env
+    build:
+        context: ./services/sentry
+        args:
+            - SENTRY_VERSION
+    image:          "${PROJECT_NAME}-sentry:${SENTRY_VERSION}"
+    container_name: "${PROJECT_NAME}-sentry-worker"
+    hostname:       "${SENTRY_WORKER_HOSTNAME:-sentry-worker}"
+    depends_on:
+        - redis
+        - postgres
+    links:
+        - redis
+        - postgres
+    command: "run worker"
+#    volumes:
+#        - ${DATA_SAVE_PATH}/sentry/worker:/data
+#    networks:
+#        - backend

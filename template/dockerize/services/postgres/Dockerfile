@@ -1,0 +1,8 @@
+ARG POSTGRES_VERSION
+
+FROM postgres:$POSTGRES_VERSION
+
+EXPOSE 5432
+
+CMD ["postgres"]
+

@@ -1,0 +1,71 @@
+
+declare -a AVAILABLE_TYPE=(local)
+declare -a ENABLE_SERVICES=(postgres redis sentry)
+
+DN_ROOT=_root_
+declare -a ADD_DOCKERIZE_DIR=($DN_ROOT bin)
+
+declare -a ADD_TO_DIST_FOLDERS=(arc data src)
+
+declare -a FOLDERS_MV_BACKUP=()
+declare -a FOLDERS_CP_BACKUP=()
+
+#######################################################
+
+DEBUG=0
+DEBUG_SCRIPT=0
+
+DO_BACKUP_DOCKERIZE=1
+
+#######################################################
+#######################################################
+#######################################################
+
+DT_STAMP=$(date +"%Y%m%d_%H%M%S")
+
+DIR_DIST="./__dist"
+DIR_TMP="./__tmp"
+DIR_BACKUP_ROOT="./__backup"
+
+DIR_DIST=$(_abs_path "$DIR_DIST")
+
+DIR_TMP=$(_abs_path "$DIR_TMP")
+
+DIR_BACKUP_ROOT=$(_abs_path "$DIR_BACKUP_ROOT")
+DIR_BACKUP="$DIR_BACKUP_ROOT/$DT_STAMP"
+
+#######################################################
+
+DIR_TEMPLATE=./template
+DIR_TEMPLATE=$(_abs_path "$DIR_TEMPLATE")
+
+DN_DOCKERIZE=dockerize
+DN_ENVS="envs"
+DN_SERVICES="services"
+
+DIR_TEMPLATE_DOCKERIZE="$DIR_TEMPLATE/$DN_DOCKERIZE"
+DIR_TEMPLATE_ENVS="$DIR_TEMPLATE_DOCKERIZE/$DN_ENVS"
+DIR_TEMPLATE_SERVICES="$DIR_TEMPLATE_DOCKERIZE/$DN_SERVICES"
+
+DIR_TMP_DOCKERIZE="$DIR_TMP/$DN_DOCKERIZE"
+DIR_BACKUP_DOCKERIZE="$DIR_BACKUP/$DN_DOCKERIZE"
+
+MAIN_YML=docker-compose.yml
+HEADER_YML=header.yml
+FOOTER_YML=footer.yml
+SERVICE_YML=service.yml
+STRING_IDENT='    '
+
+FN_SRC_IMAGE_ENV=.env
+FN_DST_IMAGE_ENV=.env
+
+FN_SRC_CONTAINER_ENV=container.env
+FN_DST_CONTAINER_ENV=container.env
+
+#######################################################
+
+#declare TEMPLATE_VAR_SEARCH="\!__IND__\!"
+#declare TEMPLATE_VAR_REPLACE=
+
+#CREATE_BAK_FILES=1
+#EXT_BAK_FILES='.bak'

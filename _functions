@@ -1,0 +1,191 @@
+###########################################
+# Service functions
+###########################################
+
+_trim() {
+    local s=$(echo -e "${1}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+    echo "$s"
+}
+
+_abs_path() {
+    local path=${1:-"./"}
+    local opt=${2:-"-m"}
+    local s=$(readlink $opt "$path")
+    echo "$s"
+}
+
+_fix_sedvar() {
+    echo "${1:-}" | sed -e 's#\\#\\\\#g' | sed -r -e 's#([ \(\)])#\\\1#g' | sed -r -e 's#(/)#\\\\\1#g'
+}
+
+_trace() {
+    echo "${FUNCNAME[1]}"
+    echo "${FUNCNAME[2]}"
+    [ ! -z "$1" ] && echo -e "$1"
+    return 0
+}
+
+_print_delimiter_line() {
+    local c=${1:-'#'}
+    local n=${2:-80}
+
+    CMD="printf '${c}%.0s' {1..${n}};echo"
+    eval "$CMD"
+}
+
+###########################################
+# Copy files functions
+###########################################
+_validate_dirs() {
+    local src=${1:-}
+    local dst=${2:-}
+
+    if [ -z "$src" ]; then
+        _trace "Incorrect src"
+        exit 1
+    fi
+
+    if [ -z "$dst" ]; then
+        _trace "Incorrect dst"
+        exit 1
+    fi
+
+    return 0
+}
+
+_mv_cp() {
+
+    local CMD=${1:-''}
+    if [ -z "$CMD" ]; then
+        _trace "Incorrect CMD"
+        exit 1
+    fi
+
+    _validate_dirs "$2" "$3"
+
+    local src=$2
+    local dst=$3
+    local opt=${4:-''}
+
+    [ -e "$src" ] || return 0
+    [ -d "$dst" ] || mkdir -p "$dst"
+
+    local CMD="$CMD $opt '$src' '$dst'"
+    [ "$DEBUG" != 1 ] || echo "$CMD"
+    eval "$CMD"
+}
+
+_mv() {
+    local src=$1
+    local dst=$2
+    local opt=${3:-''}
+    _mv_cp "mv" "$src" "$dst" "$opt"
+}
+
+_cp() {
+    local src=$1
+    local dst=$2
+    local opt=${3:-}
+
+    _mv_cp "cp" "$src" "$dst" "$opt"
+}
+
+_cp_files_from_dir() {
+    local src_dir=$1
+    local dst_dir=$2
+    local opt=${3:-}
+
+    [ ! -d "$src_dir" ] && return 0 || :
+    [ ! -d "$dst_dir" ] && mkdir -p "$dst_dir"  || :
+
+    local CMD="find $src_dir -mindepth 1 -maxdepth 1 -type f -exec cp $opt {} '$dst_dir' \;"
+    [ "$DEBUG" != 1 ] || echo "$CMD"
+    eval "$CMD"
+}
+
+_cp_dir() {
+
+    local src_dir=$1
+    local dst_dir=$2
+    local opt=${3:-}
+
+    [ ! -d "$src_dir" ] && return 0 || :
+    [ ! -d "$dst_dir" ] && mkdir -p "$dst_dir"  || :
+
+    local CMD="cp $opt '$src_dir' '$dst_dir'"
+    [ "$DEBUG" != 1 ] || echo "$CMD"
+    eval "$CMD"
+}
+
+###########################################
+
+#_replace_vars() {
+#    local min_args=5
+#
+#    if [ $# -lt $min_args ]; then
+#        _trace "Incorrect amount of arguments. Must be ='$min_args'"
+#        exit 1
+#    fi
+#
+#    local inputFile=$1
+#    local outputFile=$2
+#    local createBakFiles=$3
+#    local search=$4
+#    local replace=$5
+#    local ext=${6:-"$EXT_BAK_FILES")
+#
+#    inputFile=$(_trim "$inputFile")
+#    if [ -z "$inputFile" ] ; then
+#        _trace 'The empty input file name'
+#        exit 1
+#    fi
+#    inputFile=$(_abs_path "$inputFile")
+#    if [ ! -e "$inputFile" ]; then
+#        _trace "The file: '$inputFile' does not exists" 
+#        exit 1
+#    fi
+#
+#    outputFile=$(_trim "$outputFile")
+#    if [ -z "$outputFile" ] ; then
+#        _trace 'The empty output file name'
+#        exit 1
+#    fi
+#    outputFile=$(_abs_path "$outputFile")
+#
+#    search=$(_fix_sedvar "$search")
+#    if [ -z "$search" ] ; then
+#        _trace 'The empty search mask'
+#        exit 1
+#    fi
+#    ext=$(_trim "$ext")
+#
+#    if [ "$inputFile" = "$outputFile" -a "$CREATE_BAK_FILES" = 1 ]; then
+#        sed -i"$ext" -re "s/$search/$replace/g" "$inputFile"
+#        echo "Updated: '$outputFile'"
+#    else
+#        if [ -e "$outputFile" -a "$CREATE_BAK_FILES" = 1 -a "$ext" != '' ]; then
+#            cp 
+#        fi
+#        cat "$inputFile" | sed -re "s/$search/$replace/g" > "$outputFile"
+#        echo "Created: '$outputFile'"
+#    fi
+#}
+
+
+#Usage:
+#declare -a AVAILABLE_VARS=(v1 v2)
+#_validate AVAILABLE_VARS[@] "$VALUE"
+
+_validate() {
+    declare -a AVAILABLE=("${!1}")
+    local VALUE="$2"
+    local t
+    for t in ${AVAILABLE[@]}; do
+        [ "$t" = "$VALUE" ] && return 0
+    done
+    echo "${FUNCNAME[0]}"
+    echo "Undefined value: '${VALUE}'"
+    exit 1
+}
+
+

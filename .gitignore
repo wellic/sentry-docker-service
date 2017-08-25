@@ -1,0 +1,8 @@
+/__tmp/
+/__dist/
+/__backup/
+!.gitignore
+.idea/
+*.dot~
+
+sentry-docker-service.iml

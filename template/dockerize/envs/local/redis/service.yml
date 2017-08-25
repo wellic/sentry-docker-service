@@ -1,0 +1,21 @@
+redis:
+    restart: ${REDIS_DOCKER_RESTART}
+    env_file:
+        - .env
+        - container.env
+        - redis.env
+    build:
+        context: ./services/redis
+        args:
+            - REDIS_VERSION
+    image:          "${PROJECT_NAME}-redis:${REDIS_VERSION}"
+    container_name: "${PROJECT_NAME}-redis"
+    hostname:       "${REDIS_HOSTNAME:-redis}"
+    volumes:
+        - ${DATA_SAVE_PATH}/redis:/data
+    expose:
+        - 6379
+#    ports:
+#        - "${REDIS_PORT}:6379"
+#    networks:
+#        - backend

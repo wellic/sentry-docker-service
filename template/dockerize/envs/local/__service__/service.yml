@@ -1,0 +1,9 @@
+__service__:
+    env_file:
+        - .env
+        - container.env
+        - __service__.env
+    build:
+        context: ./services/__service__
+        args:
+            - __service_args__

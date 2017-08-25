@@ -1,0 +1,21 @@
+postgres:
+    restart: ${POSTGRES_DOCKER_RESTART}
+    env_file:
+        - .env
+        - container.env
+        - postgres.env
+    build:
+        context: ./services/postgres
+        args:
+            - POSTGRES_VERSION
+    image:          "${PROJECT_NAME}-postgres:${POSTGRES_VERSION}"
+    container_name: "${PROJECT_NAME}-postgres"
+    hostname:       "${POSTGRES_HOSTNAME:-postgres}"
+    volumes:
+        - ${DATA_SAVE_PATH}/postgres:/var/lib/postgresql/data
+    expose:
+        - 6379
+    ports:
+        - "${POSTGRES_HOST_PORT}:5432"
+#  networks:
+#    - backend
